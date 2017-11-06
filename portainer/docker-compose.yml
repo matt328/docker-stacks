@@ -21,6 +21,11 @@ services:
         - com.df.distribute=true
         - com.df.serviceDomain=portainer.basement.lan
         - com.df.port=9000
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "portainer_portainer"
 
 networks:
   portainer-net:
