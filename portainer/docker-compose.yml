@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  portainer:
+    image: portainer/portainer
+    ports:
+      - "9000"
+    networks:
+      - proxy
+      - portainer-net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/matt/docker-swarm/data/portainer/data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.serviceDomain=portainer.basement.lan
+        - com.df.port=9000
+
+networks:
+  portainer-net:
+     external: false
+  proxy:
+     external: true
+
