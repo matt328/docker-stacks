@@ -21,9 +21,9 @@ services:
 
   postgresql:
     image: sameersbn/postgresql:9.5-1
-    volumes:
     networks:
     - gitlab
+    volumes:
     - /home/matt/docker-swarm/data/gitlab/postgresql:/var/lib/postgresql:Z
     environment:
     - DB_USER=gitlab
