@@ -7,8 +7,6 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 22:22
-      - 5500:5500
     networks:
       - proxy
     environment:

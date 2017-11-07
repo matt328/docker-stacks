@@ -96,8 +96,8 @@ services:
       - GITLAB_HTTPS=false
       - SSL_SELF_SIGNED=false
 
-      - GITLAB_HOST=192.168.1.176
-      - GITLAB_PORT=8081
+      - GITLAB_HOST=gitlab.basement.lan
+      - GITLAB_PORT=8082
       - GITLAB_SSH_PORT=10022
       - GITLAB_RELATIVE_URL_ROOT=
       - GITLAB_SECRETS_DB_KEY_BASE=XCaitJoe8gjrmbZaYBXRbUt7CoplJAut4hWHJDktbVv7BwGHNGuVQusWm0x5wqjXfjerD98IKkdhg
