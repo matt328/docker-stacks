@@ -9,7 +9,7 @@ services:
     volumes:
     - /home/matt/docker-swarm/data/gitlab/redis:/var/lib/redis:Z
     networks:
-      - gitlab
+      - gitlab-net
     deploy:
       mode: replicated
       replicas: 1
@@ -22,7 +22,7 @@ services:
   postgresql:
     image: sameersbn/postgresql:9.5-1
     networks:
-    - gitlab
+    - gitlab-net
     volumes:
     - /home/matt/docker-swarm/data/gitlab/postgresql:/var/lib/postgresql:Z
     environment:
@@ -45,7 +45,7 @@ services:
     - redis
     - postgresql
     networks:
-      - gitlab
+      - gitlab-net
       - proxy
     ports:
     - "8082:80"
@@ -195,7 +195,7 @@ services:
     - OAUTH_AZURE_TENANT_ID=
 
 networks:
-  gitlab:
+  gitlab-net:
     external: false
   proxy:
     external: true
