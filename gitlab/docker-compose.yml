@@ -199,3 +199,5 @@ services:
 networks:
   gitlab:
     external: false
+  proxy:
+    external: true
