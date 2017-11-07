@@ -22,6 +22,8 @@ services:
   postgresql:
     image: sameersbn/postgresql:9.5-1
     volumes:
+    networks:
+    - gitlab
     - /home/matt/docker-swarm/data/gitlab/postgresql:/var/lib/postgresql:Z
     environment:
     - DB_USER=gitlab
@@ -57,8 +59,6 @@ services:
       mode: replicated
       replicas: 1
       labels:
-        com.docker.stack.namespace: "gitlab"
-        com.docker.service.name: "gitlab"
         com.df.notify: "true"
         com.df.distribute: "true"
         com.df.serviceDomain.1: "gitlab.basement.lan"
@@ -73,7 +73,7 @@ services:
     environment:
     - DEBUG=false
 
-    - GITLAB_REGISTRY_ENABLED=true
+    - GITLAB_REGISTRY_ENABLED=false
     - GITLAB_REGISTRY_HOST=192.168.1.176
     - GITLAB_REGISTRY_PORT=5500
     - GITLAB_REGISTRY_API_URL=http://registry:5000
