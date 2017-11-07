@@ -50,7 +50,6 @@ services:
     ports:
       - "8082:80"
       - "10022:22"
-      - "5500:5500"
     volumes:
       - /home/matt/docker-swarm/data/gitlab/gitlab:/home/git/data:Z
       - /home/matt/docker-swarm/data/gitlab/certs:/certs
