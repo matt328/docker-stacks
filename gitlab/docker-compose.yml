@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+
+  redis:
+    image: sameersbn/redis:latest
+    command:
+    - --loglevel warning
+    volumes:
+    - /home/matt/docker-swarm/data/gitlab/redis:/var/lib/redis:Z
+    networks:
+      - gitlab
+    deploy:
+      mode: replicated
+      replicas: 1
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "gitlab_redis"
+
+  postgresql:
+    image: sameersbn/postgresql:9.5-1
+    volumes:
+    - /home/matt/docker-swarm/data/gitlab/postgresql:/var/lib/postgresql:Z
+    environment:
+    - DB_USER=gitlab
+    - DB_PASS=password
+    - DB_NAME=gitlabhq_production
+    - DB_EXTENSION=pg_trgm
+    deploy:
+      mode: replicated
+      replicas: 1
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "gitlab_postgres"
+
+networks:
+  gitlab:
+    external: false
