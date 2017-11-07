@@ -42,8 +42,11 @@ services:
     depends_on:
     - redis
     - postgresql
+    networks:
+      - gitlab
+      - proxy
     ports:
-    - "8081:80"
+    - "8082:80"
     - "10022:22"
     - "5500:5500"
     volumes:
@@ -60,7 +63,7 @@ services:
         com.df.distribute: "true"
         com.df.serviceDomain.1: "gitlab.basement.lan"
         com.df.serviceDomain.2: "git.basement.lan"
-        com.df.port.1: "8081"
+        com.df.port.1: "8082"
         com.df.port.2: "22"
     logging:
       driver: "gelf"
