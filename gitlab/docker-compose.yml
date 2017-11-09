@@ -2,6 +2,22 @@ version: "3"
 
 services:
 
+  gitlab-ci-runner:
+    networks:
+      - gitlab-net
+    image: gitlab/gitlab-runner:latest 
+    volumes:
+      - /home/matt/docker-swarm/data/gitlab/gitlab-ci-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: replicated
+      replicas: 1
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "gitlab_runner"
+
   redis:
     image: sameersbn/redis:latest
     command:
@@ -48,7 +64,7 @@ services:
       - proxy
       - gitlab-net
     ports:
-      - "8082:80"
+      - "80"
       - "10022:22"
     volumes:
       - /home/matt/docker-swarm/data/gitlab/gitlab:/home/git/data:Z
@@ -62,8 +78,11 @@ services:
       labels:
         - com.df.notify=true
         - com.df.distribute=true
-        - com.df.serviceDomain=gitlab.basement.lan
-        - com.df.port=8082
+        - com.df.serviceDomain.1=gitlab.basement.lan
+        - com.df.port.1=80
+        - com.df.serviceDomain.2=gitlab.basement.lan
+        - com.df.port.2=10022
+        - com.df.srcPort.2=10022
     logging:
       driver: "gelf"
       options:
@@ -73,7 +92,7 @@ services:
       - DEBUG=false
 
       - GITLAB_REGISTRY_ENABLED=false
-      - GITLAB_REGISTRY_HOST=192.168.1.176
+      - GITLAB_REGISTRY_HOST=gitlab.basement.lan
       - GITLAB_REGISTRY_PORT=5500
       - GITLAB_REGISTRY_API_URL=http://registry:5000
       - GITLAB_REGISTRY_KEY_PATH=/certs/registry-auth.key
@@ -97,7 +116,7 @@ services:
       - SSL_SELF_SIGNED=false
 
       - GITLAB_HOST=gitlab.basement.lan
-      - GITLAB_PORT=8082
+      - GITLAB_PORT=80
       - GITLAB_SSH_PORT=10022
       - GITLAB_RELATIVE_URL_ROOT=
       - GITLAB_SECRETS_DB_KEY_BASE=XCaitJoe8gjrmbZaYBXRbUt7CoplJAut4hWHJDktbVv7BwGHNGuVQusWm0x5wqjXfjerD98IKkdhg
@@ -118,7 +137,7 @@ services:
       - GITLAB_BACKUP_TIME=01:00
 
       - SMTP_ENABLED=false
-      - SMTP_DOMAIN=www.example.com
+      - SMTP_DOMAIN=smtp.gmail.com
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
       - SMTP_USER=mailer@example.com
