@@ -25,11 +25,10 @@ services:
       driver: "gelf"
       options:
         gelf-address: "udp://127.0.0.1:12201"
-        tag: "portainer_portainer"
+        tag: "portainer"
 
 networks:
   portainer-net:
      external: false
   proxy:
      external: true
-

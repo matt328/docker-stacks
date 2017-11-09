@@ -1,87 +1,97 @@
-version: "3"
+version: '3'
 
 services:
-    
-    elasticsearch:
-        image: elasticsearch
-        networks:
-            - logging
-            - proxy
-        volumes:
-            - /home/matt/docker-swarm/data/elasticsearch/data:/usr/share/elasticsearch/data
-        labels:
-            com.docker.stack.namespace: "logging"
-            com.docker.service.name: "elasticsearch"
-        deploy:
-            mode: replicated
-            update_config:
-                parallelism: 1
-                delay: 60s
-            restart_policy:
-                condition: none
-                max_attempts: 5
-            labels:
-                com.docker.stack.namespace: "logging"
-                com.docker.service.name: "elasticsearch"
 
-    logstash:
-        image: logstash:latest
-        depends_on:
-            - elasticsearch
-        ports:
-            - "12201:12201/udp"         
-            - "8080:8082"
-        networks:
-            - logging
-            - proxy
-        command: -e "input { gelf {} } output { elasticsearch { hosts => ['elasticsearch']} stdout {} }"
-        labels:
-            com.docker.stack.namespace: "logging"
-            com.docker.service.name: "logstash"
-        deploy:
-            mode: replicated
-            update_config:
-                parallelism: 1
-                delay: 60s
-            restart_policy:
-                condition: none
-                max_attempts: 5
-            labels:
-                com.docker.stack.namespace: "logging"
-                com.docker.service.name: "logstash"
-
-    kibana:
-        image: kibana
-        depends_on:
-            - elasticsearch        
-        ports:
-            - "5601:5601"          
-        networks:
-            - logging
-            - proxy
-        environment:
-            - ELASTICSEARCH_URL=http://elasticsearch:9200
-        labels:
-            com.docker.stack.namespace: "logging"
-            com.docker.service.name: "kibana"
-        deploy:
-            mode: replicated
-            update_config:
-                parallelism: 1
-                delay: 60s
-            restart_policy:
-                condition: none
-                max_attempts: 5
-            labels:
-                com.docker.stack.namespace: "logging"
-                com.docker.service.name: "kibana"
-                com.df.notify: "true"
-                com.df.distribute: "true"
-                com.df.serviceDomain: "kibana.basement.lan"
-                com.df.port: "5601"
-networks:
+  elasticsearch:
+    image: elasticsearch
+    networks:
+      - logging
+      - proxy
+    volumes:
+      - /home/matt/docker-swarm/data/elasticsearch/data:/usr/share/elasticsearch/data
+    labels:
+      com.docker.stack.namespace: logging
+      com.docker.service.name: elasticsearch
+    deploy:
+      mode: replicated
+      update_config:
+        parallelism: 1
+        delay: 60s
+      restart_policy:
+        condition: none
+        max_attempts: 5
+      labels:
+        com.docker.stack.namespace: logging
+        com.docker.service.name: elasticsearch
     logging:
-        external: true
-    proxy:
-        external: true
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: elasticsearch
 
+  logstash:
+    image: 'logstash:latest'
+    depends_on:
+      - elasticsearch
+    ports:
+      - '12201:12201/udp'
+      - '8080:8082'
+    networks:
+      - logging
+      - proxy
+    command: -e "input { gelf {} } output { elasticsearch { hosts => ['elasticsearch']} stdout {} }"
+    labels:
+      com.docker.stack.namespace: logging
+      com.docker.service.name: logstash
+    deploy:
+      mode: replicated
+      update_config:
+        parallelism: 1
+        delay: 60s
+      restart_policy:
+        condition: none
+        max_attempts: 5
+      labels:
+        com.docker.stack.namespace: logging
+        com.docker.service.name: logstash
+
+  kibana:
+    image: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - '5601:5601'
+    networks:
+      - logging
+      - proxy
+    environment:
+      - 'ELASTICSEARCH_URL=http://elasticsearch:9200'
+    labels:
+      com.docker.stack.namespace: logging
+      com.docker.service.name: kibana
+    deploy:
+      mode: replicated
+      update_config:
+        parallelism: 1
+        delay: 60s
+      restart_policy:
+        condition: none
+        max_attempts: 5
+      labels:
+        com.docker.stack.namespace: logging
+        com.docker.service.name: kibana
+        com.df.notify: 'true'
+        com.df.distribute: 'true'
+        com.df.serviceDomain: kibana.basement.lan
+        com.df.port: '5601'
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: kibana
+
+networks:
+  logging:
+    external: true
+  proxy:
+    external: true
