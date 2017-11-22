@@ -23,11 +23,6 @@ services:
       labels:
         com.docker.stack.namespace: logging
         com.docker.service.name: elasticsearch
-    logging:
-      driver: gelf
-      options:
-        gelf-address: 'udp://127.0.0.1:12201'
-        tag: elasticsearch
 
   logstash:
     image: 'logstash:latest'
@@ -84,11 +79,6 @@ services:
         com.df.distribute: 'true'
         com.df.serviceDomain: kibana.basement.lan
         com.df.port: '5601'
-    logging:
-      driver: gelf
-      options:
-        gelf-address: 'udp://127.0.0.1:12201'
-        tag: kibana
 
 networks:
   logging:
