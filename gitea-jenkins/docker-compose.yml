@@ -1,0 +1,78 @@
+version: '3'
+
+services:
+
+  gitea:
+    image: gitea/gitea:latest
+    networks:
+      - proxy
+      - gitea
+    ports:
+      - "3000"
+      - "10022:22"
+    volumes:
+    - /home/matt/docker-swarm/data/gitea:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.serviceDomain.1=git.basement.lan
+        - com.df.port.1=3000
+        - com.df.serviceDomain.2=git.basement.lan
+        - com.df.port.2=10022
+        - com.df.srcPort.2=10022
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: gitea
+
+  postgres:
+    image: 'sameersbn/postgresql:9.5-1'
+    networks:
+      - gitea
+    volumes:
+      - '/home/matt/docker-swarm/data/gitea/postgresql:/var/lib/postgresql:Z'
+    environment:
+      - DB_USER=gitea
+      - DB_PASS=password
+      - DB_NAME=gitea
+      - DB_EXTENSION=pg_trgm
+    deploy:
+      mode: replicated
+      replicas: 1
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: postgres
+
+  jenkins:
+    image: jenkins:alpine
+    networks:
+      - proxy
+      - gitea
+    ports:
+      - 8085:8080
+    volumes:
+      - /home/matt/docker-swarm/data/jenkins:/var/jenkins_home
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.serviceDomain=jenkins.basement.lan
+        - com.df.port=8081
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: jenkins
+
+networks:
+  proxy:
+    external: true
+  gitea:

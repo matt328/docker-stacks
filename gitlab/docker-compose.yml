@@ -2,6 +2,38 @@ version: '3'
 
 services:
 
+  registry:
+    image: registry:2.4.1
+    volumes:
+    - /home/matt/docker-swarm/data/gitlab/shared/registry:/registry
+    - /home/matt/docker-swarm/data/gitlab/certs:/certs
+    ports:
+    - "5000:5000"
+    networks:
+      - proxy
+      - gitlab-net
+    environment:
+    - REGISTRY_LOG_LEVEL=info
+    - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
+    - REGISTRY_AUTH_TOKEN_REALM=http://git.basement.lan/jwt/auth
+    - REGISTRY_AUTH_TOKEN_SERVICE=container_registry
+    - REGISTRY_AUTH_TOKEN_ISSUER=gitlab-issuer
+    - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/registry-auth.crt
+    - REGISTRY_STORAGE_DELETE_ENABLED=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.serviceDomain=registry.basement.lan
+        - com.df.port=5000
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: registry
+
   gitlab-ci-runner:
     networks:
       - gitlab-net
@@ -79,9 +111,9 @@ services:
       labels:
         - com.df.notify=true
         - com.df.distribute=true
-        - com.df.serviceDomain.1=gitlab.basement.lan
+        - com.df.serviceDomain.1=git.basement.lan
         - com.df.port.1=80
-        - com.df.serviceDomain.2=gitlab.basement.lan
+        - com.df.serviceDomain.2=git.basement.lan
         - com.df.port.2=10022
         - com.df.srcPort.2=10022
     logging:
@@ -92,7 +124,7 @@ services:
     environment:
       - DEBUG=false
       - GITLAB_REGISTRY_ENABLED=false
-      - GITLAB_REGISTRY_HOST=gitlab.basement.lan
+      - GITLAB_REGISTRY_HOST=git.basement.lan
       - GITLAB_REGISTRY_PORT=5500
       - 'GITLAB_REGISTRY_API_URL=http://registry:5000'
       - GITLAB_REGISTRY_KEY_PATH=/certs/registry-auth.key
@@ -110,7 +142,7 @@ services:
       - GITLAB_TIMEZONE=America/New_York
       - GITLAB_HTTPS=false
       - SSL_SELF_SIGNED=false
-      - GITLAB_HOST=gitlab.basement.lan
+      - GITLAB_HOST=git.basement.lan
       - GITLAB_PORT=80
       - GITLAB_SSH_PORT=10022
       - GITLAB_RELATIVE_URL_ROOT=
