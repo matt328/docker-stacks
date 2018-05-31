@@ -1,0 +1,26 @@
+version: '3.0'
+
+services:
+  verdaccio:
+    image:  verdaccio/verdaccio:latest
+    volumes:
+      - /home/matt/docker-swarm/data/verdaccio/conf:/verdaccio/conf
+      - /home/matt/docker-swarm/data/verdaccio/storage:/verdaccio/storage
+    networks: 
+      - proxy
+    ports:
+      - 4873:4873
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.serviceDomain=npm.basement.lan
+        - com.df.port=4873
+networks:
+  proxy:
+     external: true
+
