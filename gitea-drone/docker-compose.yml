@@ -7,22 +7,24 @@ volumes:
 
 networks:
   gitea-net:
-    external: false
+    external: true
   proxy:
     external: true
 
 services:
   gitea-server:
     image: gitea/gitea:latest
+    depends_on: 
+      - gitea-db
     ports:
-      - '8380:3000'
-      - '10022:22'
+      - '3000'
+      - '10023:22'
     networks:
       - proxy
       - gitea-net
     volumes:
-      - '/home/matt/docker-swarm/gitea:/data'
-      - '/home/matt/docker-swarm/gitea/data:/data/gitea'
+      - '/home/matt/docker-swarm/data/gitea:/data'
+      - '/home/matt/docker-swarm/data/gitea/data:/data/gitea'
     deploy:
       mode: replicated
       replicas: 1
@@ -30,10 +32,10 @@ services:
         - com.df.notify=true
         - com.df.distribute=true
         - com.df.serviceDomain.1=gitea.basement.lan
-        - com.df.port.1=8380
+        - com.df.port.1=3000
         - com.df.serviceDomain.2=gitea.basement.lan
-        - com.df.port.2=10022
-        - com.df.srcPort.2=10022
+        - com.df.port.2=10023
+        - com.df.srcPort.2=10023
 
   gitea-db:
     image: postgres:alpine
@@ -42,7 +44,7 @@ services:
     ports:
       - '5440:5432'
     volumes:
-      - /home/matt/docker-swarm/data/gitea/db:/var/lib/postgresql/data
+      - '/home/matt/docker-swarm/data/gitea/db:/var/lib/postgresql/data'
     environment:
       - POSTGRES_PASSWORD=test
       - POSTGRES_DB=gitea
@@ -52,18 +54,22 @@ services:
 
   drone-server:
     image: drone/drone:0.8
+    networks:
+      - gitea-net
+      - proxy
     ports:
-      - '8381:8000'
-      - '9000:9000'
+      - '8000'
+      - '9001:9000'
     volumes:
       - drone-db:/var/lib/drone/
     environment:
       - DRONE_OPEN=true
-      - DRONE_HOST=http://drone.basement.lan:8381
+      - DRONE_HOST=http://drone.basement.lan
       - DRONE_SECRET=test
       - DRONE_GITEA=true
-      - DRONE_GITEA_URL=http://gitea.basement.lan:8381/
+      - DRONE_GITEA_URL=http://gitea.basement.lan/
       - DRONE_NETWORK=gitea-net
+      - DRONE_ADMIN=matt
     deploy:
       mode: replicated
       replicas: 1
@@ -71,21 +77,23 @@ services:
         - com.df.notify=true
         - com.df.distribute=true
         - com.df.serviceDomain.1=drone.basement.lan
-        - com.df.port.1=8381
-        - com.df.srcPort.1=8381
+        - com.df.port.1=8000
         - com.df.serviceDomain.2=drone.basement.lan
-        - com.df.port.2=9000
-        - com.df.srcPort.2=9000
+        - com.df.port.2=9001
+        - com.df.srcPort.2=9001
 
   drone-agent:
     image: drone/agent:0.8
     command: agent
+    networks:
+      - gitea-net
+      - proxy
     depends_on:
       - drone-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=drone.basement.lan:9000
+      - DRONE_SERVER=drone-server:9000
       - DRONE_SECRET=test
     deploy:
       mode: replicated

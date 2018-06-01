@@ -15,11 +15,6 @@ services:
       - DEBUG=true
     deploy:
       replicas: 2
-    logging:
-      driver: gelf
-      options:
-        gelf-address: "udp://127.0.0.1:12201"
-        tag: "proxy_proxy"
 
   swarm-listener:
     image: vfarcic/docker-flow-swarm-listener
@@ -33,11 +28,6 @@ services:
     deploy:
       placement:
         constraints: [node.role == manager]
-    logging:
-      driver: gelf
-      options:
-        gelf-address: "udp://127.0.0.1:12201"
-        tag: "proxy_swarm-listener"
 
 networks:
   proxy:
